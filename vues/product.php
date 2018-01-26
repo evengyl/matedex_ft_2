@@ -166,7 +166,8 @@ if((isset($_SESSION['pseudo']) && $_SESSION['pseudo'] == 'evengyl') && (isset($_
                 });
             
 
-                $("#product_page").on("click", "#save_caract", function(){
+                $("#product_page").on("click", "#save_caract", function(event){
+                    event.preventDefault();
                     var selected_id_caract_name = $("#form_add_caract select option:selected").val(); //l'id du select name sélectionné
                     var input_caract_value = $("#form_add_caract input[data-name='value_caract']").val(); //valeur du input value que l'on à écris
 
