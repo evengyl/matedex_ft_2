@@ -29,6 +29,39 @@ if($_POST['action'] == 'edit')
 
 	regen_product($_app);
 }
+elseif($_POST["action"] == "get_form_for_change_trans")
+{
+	//on va aller chercher les 3 value du name attribut ou autre pour les 3 tranduction, retour label + input prérempli
+	$req_sql = new stdClass();
+	$req_sql->table = $_POST['table'];
+	$req_sql->where = ['id'=>$_POST['id']];
+	$req_sql->var = $_POST["var"];
+	$res_sql = $_app->sql->select($req_sql);
+
+	$array_value = explode(",", $_POST["var"]);
+
+	ob_start();?>
+		<div class="block_edit_trans">
+			<div class="input-group">
+				<div class="input-group-addon">FR</div>
+				<input class="form-control" data-name="<?= trim($array_value[0]) ?>" placeholder="<?= $res_sql[0]->{trim($array_value[0])} ?>"></input>
+			</div>
+
+			<div class="input-group">
+				<div class="input-group-addon">EN</div>
+				<input class="form-control" data-name="<?= trim($array_value[1]) ?>" placeholder="<?= $res_sql[0]->{trim($array_value[1])} ?>"></input>
+			</div>
+
+			<div class="input-group">
+				<div class="input-group-addon">NL</div>
+				<input class="form-control" data-name="<?= trim($array_value[2]) ?>" placeholder="<?= $res_sql[0]->{trim($array_value[2])} ?>"></input>
+			</div>
+			<a class="col-xs-12 btn btn-primary" style="padding-left:10px; padding-right:10px;" data-action="save_trans_modified"  data-table="<?= $_POST['table'] ?>" data-id="<?= $_POST['id'] ?>" title="Save"><span class="fas fa-save">&nbsp;Save New feature</span></a>
+		</div><?
+	$return = ob_get_clean();
+	echo $return;	
+
+}
 elseif($_POST['action'] == "get_all_caract_name")
 {
 	$req_product = new stdClass();
@@ -76,7 +109,7 @@ else if($_POST['action'] == "add_caract")
 			$req_sql = new stdClass();
 			$req_sql->table = 'ma_ft_product_caract_value';
 			$req_sql->ctx = new stdClass();
-			$req_sql->ctx->value = $_POST['caract_value'];
+			$req_sql->ctx->{"value_".$_SESSION['lang']} = $_POST['caract_value'];
 			$_app->sql->insert_into($req_sql);
 			unset($req_sql);
 
@@ -258,8 +291,8 @@ function regen_product(&$_app)
 
 		$req_product_caract = new stdClass();
 		$req_product_caract->table = "ma_ft_product_caract";
-		$req_product_caract->var = "ma_ft_product_caract.id AS id_line_caract, ma_ft_product_caract_name.id AS id_name, ma_ft_product_caract_value.id AS id_value, ma_ft_product_caract_value.value";
-		$req_product_caract->var_translate = "ma_ft_product_caract_name.name";
+		$req_product_caract->var = "ma_ft_product_caract.id AS id_line_caract, ma_ft_product_caract_name.id AS id_name, ma_ft_product_caract_value.id AS id_value";
+		$req_product_caract->var_translate = "ma_ft_product_caract_name.name, ma_ft_product_caract_value.value";
 		$req_product_caract->join = ["ma_ft_product_caract_name", "ma_ft_product_caract_value"];
 		$req_product_caract->on = ["ma_ft_product_caract_name.id = ma_ft_product_caract.id_caract_name", "ma_ft_product_caract_value.id = ma_ft_product_caract.id_caract_value"];
 		$req_product_caract->where = ["id_product" => $_POST['id_product']];

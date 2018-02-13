@@ -48,6 +48,7 @@ if((isset($_SESSION['pseudo']) && $_SESSION['pseudo'] == 'evengyl') && (isset($_
             //on ajoute les icon indiquant qu'on peux modifier
             var icon_pencil = '&nbsp;&nbsp;<span style="display:inline-block; color:#ffcfcf;" class="glyphicon glyphicon-pencil"></span>';
             $("[data-action='edit'").after(icon_pencil).css({"border" : "1px dashed #ffcfcf"});
+            $("[data-action='edit_simple_lang'").after(icon_pencil).css({"border" : "1px dashed #ffcfcf"});
 
             var icon_add = '&nbsp;&nbsp;<span style="cursor:pointer; color:#00f9dc;" class="glyphicon glyphicon-plus" id="add_attribut"></span>';
             $("#block_attribut h3").append(icon_add);
@@ -57,7 +58,7 @@ if((isset($_SESSION['pseudo']) && $_SESSION['pseudo'] == 'evengyl') && (isset($_
 
             //ON ADD LE BOUTON D ADD DOC
             $("#product_document").append('<button class="btn btn-primary col-xs-6 col-xs-offset-3" data-action="add_document">Add Document on this product<span class="glyphicon glyphicon-plus"></span></button>');     
-            $("#product_document .thumbnail").append('<button class="btn btn-default"><span style="cursor:pointer;" data-action="delete_document" class="glyphicon glyphicon-trash"></span></button>');     
+            $("#product_document .thumbnail").append('<button class="btn btn-default" data-action="delete_document"><span style="cursor:pointer;" class="glyphicon glyphicon-trash"></span></button>');     
 
         }
 
@@ -159,46 +160,56 @@ if((isset($_SESSION['pseudo']) && $_SESSION['pseudo'] == 'evengyl') && (isset($_
             });
 
 
+            $("#product_page").on('click', "[data-action='edit_simple_lang']", function()
+            {
+
+
+                var obj = $(this);
+                $(".block_edit_trans").fadeOut("slow", function() {
+                    $(this).remove();
+                });
+
+                var table = obj.attr('data-table');
+                var id = obj.attr('data-id-attribut');
+
+                $.post(edit_product_way, {"action":"get_form_for_change_trans", "id":id, "table":table, "var":"name_fr, name_en, name_nl"}, function( data_return )
+                {  
+                    obj.after(data_return);
+
+                    $("[data-action='save_trans_modified']").on('click', function(){
+                        alert("tata");
+                        $.ajax({
+                            url: edit_product_way,
+                            type: "POST",
+                            data:'action=edit&data='+changed+'&column='+column+'&table='+table+'&id_product='+id+'&id_attribut='+id_attribut+'',
+                            success: function(data_return){
+                                $("#product_page").html( data_return );
+                                add_icon();
+                            }
+                        });
+                    });
+                });
+            });
+
+
             $("#product_page").on('click', '#add_caract' ,function(){
                 $.post(edit_product_way, {"action":"get_all_caract_name"}, function( data_return )
                 {
                     $("#box_for_add_caract").html( data_return );
-                });
-            
-
-                $("#product_page").on("click", "#save_caract", function(event){
-                    event.preventDefault();
-                    var selected_id_caract_name = $("#form_add_caract select option:selected").val(); //l'id du select name sélectionné
-                    var input_caract_value = $("#form_add_caract input[data-name='value_caract']").val(); //valeur du input value que l'on à écris
-
-                    //on test si y c'est un new name ajouter
+                
+                     //on test si y c'est un new name ajouter
                     var new_caract_name_fr = "";
                     var new_caract_name_en = "";
                     var new_caract_name_nl = "";
 
-                    if($("#form_add_caract select option:selected").val() == "other")
-                    {
-                        new_caract_name_fr = $("#form_add_caract label input[data-name='value_new_caract_fr']").val();
-                        new_caract_name_en = $("#form_add_caract label input[data-name='value_new_caract_en']").val();
-                        new_caract_name_nl = $("#form_add_caract label input[data-name='value_new_caract_nl']").val();
-                    }
-
-                    $.ajax({
-                        url: edit_product_way,
-                        type: "POST",
-                        data:"action=add_caract&id_product="+prod_id+"&id_caract_name="+selected_id_caract_name+"&caract_value="+input_caract_value+"&new_caract_name_fr="+new_caract_name_fr+"&new_caract_name_en="+new_caract_name_en+"&new_caract_name_nl="+new_caract_name_nl+"",
-                        success: function(data_return){
-                            $("#product_page").html( data_return );
-                            add_icon();
-                        }
-                    });
-
+                    console.log($("#form_add_caract select option:selected").val());
                     $("#product_page").on("change", "#form_add_caract select", function()
                     {
                         var selected_value_caract_name = $("#form_add_caract select option:selected").val();
                         if(selected_value_caract_name == "other")
                         {
                             $('label').show();
+                            
                         }
                         else
                         {
@@ -206,18 +217,28 @@ if((isset($_SESSION['pseudo']) && $_SESSION['pseudo'] == 'evengyl') && (isset($_
                         }
                     });
 
+
+
+                    $("#save_caract").on("click", function(){
+                        var selected_id_caract_name = $("#form_add_caract select option:selected").val(); //l'id du select name sélectionné
+                        var input_caract_value = $("#form_add_caract input[data-name='value_caract']").val(); //valeur du input value que l'on à écris
+
+                        new_caract_name_fr = $("#form_add_caract label input[data-name='value_new_caract_fr']").val();
+                        new_caract_name_en = $("#form_add_caract label input[data-name='value_new_caract_en']").val();
+                        new_caract_name_nl = $("#form_add_caract label input[data-name='value_new_caract_nl']").val();
+
+                        $.ajax({
+                            url: edit_product_way,
+                            type: "POST",
+                            data:"action=add_caract&id_product="+prod_id+"&id_caract_name="+selected_id_caract_name+"&caract_value="+input_caract_value+"&new_caract_name_fr="+new_caract_name_fr+"&new_caract_name_en="+new_caract_name_en+"&new_caract_name_nl="+new_caract_name_nl+"",
+                            success: function(data_return){
+                                $("#product_page").html( data_return );
+                                add_icon();
+                            }
+                        });
+                    });
                 });
             });
-
-
-            
-
-
-
-            
-
-
-           
 
 
             $("#product_page").on('click', '#add_attribut' ,function(){
@@ -250,19 +271,19 @@ if((isset($_SESSION['pseudo']) && $_SESSION['pseudo'] == 'evengyl') && (isset($_
             
             $("#product_page").on('click', '[data-action="add_document"]' ,function(){
 
-                if ($("#block_add_new_document").length) return;
+                if ($("#block_add_new_document").length) return; //si le bloc existe déjà
 
                 $(this).after('<div id="block_add_new_document" class="col-xs-6 col-xs-offset-3" style="padding:15px;">\
-                                        <input type="text" data-input="new_name_doc_fr" placeholder="Document Name FR" class="col-xs-12">\
-                                        <input type="text" data-input="new_name_doc_en" placeholder="Document Name EN" class="col-xs-12">\
-                                        <input type="text" data-input="new_name_doc_nl" placeholder="Document Name NL" class="col-xs-12">\
-                                        <input type="text" data-input="new_doc_url" value="(document)/pdf/product_document/" class="col-xs-12">\
-                                        <input type="text" data-input="new_doc_img" value="(image)/pdf/product_document/" class="col-xs-12">\
-                                        <div class="btn-group col-xs-12" style="padding-top:15px;">\
-                                            <a class="col-xs-6 btn btn-success" id="save" title="Save"><span class="fas fa-save"></span></a>\
-                                            <a class="col-xs-6 btn btn-warning" id="hide" title="Hide"><span class="fas fa-window-close "></span></a>\
-                                        </div>\
-                                    </div>');
+                                    <input type="text" data-input="new_name_doc_fr" placeholder="Document Name FR" class="col-xs-12">\
+                                    <input type="text" data-input="new_name_doc_en" placeholder="Document Name EN" class="col-xs-12">\
+                                    <input type="text" data-input="new_name_doc_nl" placeholder="Document Name NL" class="col-xs-12">\
+                                    <input type="text" data-input="new_doc_url" value="(document)/pdf/product_document/" class="col-xs-12">\
+                                    <input type="text" data-input="new_doc_img" value="(image)/pdf/product_document/" class="col-xs-12">\
+                                    <div class="btn-group col-xs-12" style="padding-top:15px;">\
+                                        <a class="col-xs-6 btn btn-success" id="save" title="Save"><span class="fas fa-save"></span></a>\
+                                        <a class="col-xs-6 btn btn-warning" id="hide" title="Hide"><span class="fas fa-window-close "></span></a>\
+                                    </div>\
+                                </div>');
 
 
                 $("#block_add_new_document").on("click", "#save", function()

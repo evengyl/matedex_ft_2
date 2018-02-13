@@ -33,10 +33,11 @@
             {
                 foreach($product->caract as $array_caract)
                 {?>
-                    <span data-action="edit" data-table="ma_ft_product_caract_name" data-column="name_<?= $_SESSION['lang']?>" data-id-attribut="<?= $array_caract->id_name ?>" data-id="<?= $product->id ?>" class="caract" style="color:#9FC418;" ><?= $array_caract->name; ?></span>
-                    <span data-action="edit" data-id-line-product="<?= $array_caract->id_line_caract; ?>" data-table="ma_ft_product_caract_value" data-column="value" data-id-attribut="<?= $array_caract->id_value ?>" data-id="<?= $product->id ?>" class="caract"><?=(empty($array_caract->value))?"N/C":$array_caract->value; ?></span><br><?
+                    <span data-action="edit_simple_lang" data-table="ma_ft_product_caract_name" data-column="name_<?= $_SESSION['lang']?>" data-id-attribut="<?= $array_caract->id_name ?>" data-id="<?= $product->id ?>" class="caract" style="color:#9FC418;" ><?= $array_caract->name; ?></span>
+                    <span data-action="edit" data-id-line-product="<?= $array_caract->id_line_caract; ?>" data-table="ma_ft_product_caract_value" data-column="value_<?= $_SESSION['lang']?>" data-id-attribut="<?= $array_caract->id_value ?>" data-id="<?= $product->id ?>" class="caract"><?=(empty($array_caract->value))?"N/C":$array_caract->value; ?></span><br><?
                 }   
             }?>
+            <div style="margin-top:15px; display:block;" data-function="box_for_edit_caract" class="col-xs-12" id="box_for_edit_caract"></div>
     		<div style="margin-top:15px;" class="col-xs-12" id="box_for_add_caract"></div>
         </div>
     </div>
